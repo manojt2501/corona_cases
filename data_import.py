@@ -1,6 +1,6 @@
 import pyodbc
 import logging
-def create_conn(sql,api_data):
+def create_conn(sql):
     logging.info('Connection getting initiated')
     try:
         conn = pyodbc.connect(
@@ -9,15 +9,21 @@ def create_conn(sql,api_data):
         conn = False
     if conn:
         logging.info('connection created successfully with SQL')
-        logging.info('Calling table import function')
-        table_import(conn,api_data)
-    else:
         conn.close()
+        return 1
+    else:
         logging.error('Unable to create connection with SQL. please check connection string')
+        conn.close()
+        return 0
 
-def table_import(cnxn,data):
+def table_import(sql,data):
+    try:
+        conn = pyodbc.connect(
+            'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' + sql['username'] + ';PWD=' + sql['password'])
+    except pyodbc.Error:
+        conn = False
     logging.info('inside table import function')
-    cursor= cnxn.cursor()
+    cursor= conn.cursor()
     for list in data:
         values = ', '.join("'" + str(x) + "'" for x in list.values())
         enc = values.encode("utf-8")
@@ -26,7 +32,21 @@ def table_import(cnxn,data):
         # print(sql)
         # cursor.execute(sql)
         # cursor.commit()
-    cnxn.close()
+    conn.close()
+
+def last_updatecomp(sql):
+    try:
+        conn = pyodbc.connect(
+            'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' + sql['username'] + ';PWD=' + sql['password'])
+    except pyodbc.Error:
+        conn = False
+    cursor = conn.cursor()
+    cursor.execute('select * from corona.. last_updated')
+    last_updatetemp = cursor.fetchone()
+    last_update=str(last_updatetemp).replace("('","").replace("', )","")
+    print(last_update)
+    return last_update
+
 
 
 

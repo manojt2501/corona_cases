@@ -11,9 +11,15 @@ def main():
     SQL_string = dict(Config.items('SQL'))
     URL = dict(Config.items('API'))
     if request.check_valid(URL) != 0:
-        corona = request.get_content(URL)
-        daily_updates = content_data.daily_cases(corona)
-        data_import.create_conn(SQL_string,daily_updates)
+        if data_import.create_conn(SQL_string) != 0:
+            corona = request.get_content(URL)
+            if content_data.date_compare(corona) != data_import.last_updatecomp(SQL_string):
+                daily_updates = content_data.daily_cases(corona)
+                data_import.table_import(SQL_string,daily_updates)
+            else:
+                return 'date already imported for the day'
+        else:
+            return 'failed'
         return 'success'
     else:
         return 'failed'
