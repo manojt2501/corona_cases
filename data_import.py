@@ -12,6 +12,7 @@ def create_conn(sql,api_data):
         logging.info('Calling table import function')
         table_import(conn,api_data)
     else:
+        conn.close()
         logging.error('Unable to create connection with SQL. please check connection string')
 
 def table_import(cnxn,data):
@@ -23,9 +24,10 @@ def table_import(cnxn,data):
         sql = "INSERT INTO corona..daily_updates (country_name, country_code, new_cases, total_cases, new_deaths, total_deaths, new_recovered, total_recovered, date) VALUES (%s);" % (
             enc.decode().replace("d'I", "d''I"))
         # print(sql)
-        cursor.execute(sql)
-        cursor.commit()
+        # cursor.execute(sql)
+        # cursor.commit()
     cnxn.close()
+
 
 
 

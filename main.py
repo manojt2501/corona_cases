@@ -2,6 +2,9 @@ import request
 import configparser
 import content_data
 import data_import
+from flask import Flask
+app = Flask(__name__)
+@app.route('/get_data')
 def main():
     Config = configparser.ConfigParser()
     Config.read(r"D:\code\corona_cases\connection.ini")
@@ -11,9 +14,11 @@ def main():
         corona = request.get_content(URL)
         daily_updates = content_data.daily_cases(corona)
         data_import.create_conn(SQL_string,daily_updates)
+        return 'success'
     else:
-        return 0
+        return 'failed'
 
-if __name__=="__main__":
-    main()
+if __name__=='__main__':
+    app.run(host='localhost', port=8000, debug=True)
+
 
