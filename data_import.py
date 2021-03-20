@@ -13,7 +13,6 @@ def create_conn(sql):
         return 1
     else:
         logging.error('Unable to create connection with SQL. please check connection string')
-        conn.close()
         return 0
 
 def table_import(sql,data):
@@ -30,9 +29,10 @@ def table_import(sql,data):
         sql = "INSERT INTO corona..daily_updates (country_name, country_code, new_cases, total_cases, new_deaths, total_deaths, new_recovered, total_recovered, date) VALUES (%s);" % (
             enc.decode().replace("d'I", "d''I"))
         # print(sql)
-        # cursor.execute(sql)
-        # cursor.commit()
+        cursor.execute(sql)
+        cursor.commit()
     conn.close()
+    return 'DATA imported successfully'
 
 def last_updatecomp(sql):
     try:
