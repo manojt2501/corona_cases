@@ -1,28 +1,31 @@
 import pyodbc
 import logging
-def create_conn(sql):
+def check_conn(sql):
     logging.info('Connection getting initiated')
     try:
         conn = pyodbc.connect(
             'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' + sql['username'] + ';PWD=' + sql['password'])
     except pyodbc.Error:
-        conn = False
+        conn = 0
     if conn:
         logging.info('connection created successfully with SQL')
         conn.close()
-        return 1
+        return 'success'
     else:
         logging.error('Unable to create connection with SQL. please check connection string')
-        return 0
+        return 'failed'
+
+def create_conn(sql):
+    conn1 = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' +
+        sql['username'] + ';PWD=' + sql['password'])
+    cursor=conn1.cursor()
+    return cursor
+
 
 def table_import(sql,data):
-    try:
-        conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' + sql['username'] + ';PWD=' + sql['password'])
-    except pyodbc.Error:
-        conn = False
+    cursor= create_conn(sql)
     logging.info('inside table import function')
-    cursor= conn.cursor()
     for list in data:
         values = ', '.join("'" + str(x) + "'" for x in list.values())
         enc = values.encode("utf-8")
@@ -31,21 +34,17 @@ def table_import(sql,data):
         # print(sql)
         cursor.execute(sql)
         cursor.commit()
-    conn.close()
+    cursor.close()
     return 'DATA imported successfully'
 
 def last_updatecomp(sql):
-    try:
-        conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' + sql['username'] + ';PWD=' + sql['password'])
-    except pyodbc.Error:
-        conn = False
-    cursor = conn.cursor()
+    cursor = create_conn(sql)
     cursor.execute('select * from corona.. last_updated')
     last_updatetemp = cursor.fetchone()
-    last_update=str(last_updatetemp).replace("('","").replace("', )","")
-    print(last_update)
+    last_update = str(last_updatetemp).replace("('", "").replace("', )", "")
+    cursor.close()
     return last_update
+
 
 
 

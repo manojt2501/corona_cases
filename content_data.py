@@ -11,7 +11,6 @@ def daily_cases(respose_data):
 def date_compare(res_data):
     Api_tempdate= res_data['Global']['Date']
     Api_date=Api_tempdate[ 0 : Api_tempdate.index("T")]
-    print(Api_date)
     return Api_date
 
 
