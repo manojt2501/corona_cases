@@ -2,13 +2,13 @@ import logging
 
 
 def daily_cases(response_data):
-    countrywise_data = response_data['Countries']
-    logging.info(f'API fetched {len(countrywise_data)} countries data')
-    for i in countrywise_data:
+    country_data = response_data['Countries']
+    logging.info(f'API fetched {len(country_data)} countries data')
+    for i in country_data:
         del i['Slug']
         del i['Premium']
         del i['ID']
-    return countrywise_data
+    return country_data
 
 
 def date_compare(res_data):
