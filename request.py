@@ -1,6 +1,7 @@
 import requests
 import logging
 
+
 def check_valid(url):
     response = requests.get(url['url'])
     requests.session().close()
@@ -11,8 +12,8 @@ def check_valid(url):
         logging.error(f'response failed with code : {response.status_code} , please try after sometime')
         return 'failed'
 
+
 def get_content(url):
     content = requests.get(url['url'])
     requests.session().close()
     return content.json()
-
