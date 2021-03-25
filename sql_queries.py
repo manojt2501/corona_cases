@@ -3,28 +3,29 @@ import logging
 
 
 def check_conn(sql):
-    logging.info('Connection getting initiated')
+    logging.info('Initiating connection with SQL')
     try:
         conn = pyodbc.connect(
             'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE='
             + sql['database'] + ';UID=' +
             sql['username'] + ';PWD=' + sql['password'])
-    except pyodbc.Error:
+    except pyodbc.Error as er:
         conn = 0
+        sql_error = er.args[1]
+        logging.error(sql_error)
     if conn:
-        logging.info('connection created successfully with SQL')
-        conn.close()
+        logging.info('connection created successfully')
         return 'success'
     else:
-        logging.error('Unable to create connection with SQL. please check connection string')
+        logging.error('Unable to create connection with SQL. please check above exception')
         return 'failed'
 
 
 def create_conn(sql):
-    conn1 = pyodbc.connect(
+    conn = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' +
         sql['username'] + ';PWD=' + sql['password'])
-    cursor = conn1.cursor()
+    cursor = conn.cursor()
     return cursor
 
 

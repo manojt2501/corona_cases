@@ -1,5 +1,4 @@
 import request_api
-import configparser
 import data_master
 import sql_queries
 from flask import render_template
@@ -11,11 +10,8 @@ app = Flask(__name__)
 
 @app.route('/data_import')
 def main():
-    logging.info('processing your request')
-    config = configparser.ConfigParser()
-    config.read(r"D:\code\corona_cases\connection.ini")
-    sql_string = dict(config.items('SQL'))
-    url = dict(config.items('API'))
+    sql_string = data_master.data_config('sql')
+    url = data_master.data_config('url')
     if request_api.check_valid(url) == 'success':
         logging.info('API sent valid response, proceeding to verify SQL connection')
         if sql_queries.check_conn(sql_string) == 'success':
@@ -38,14 +34,15 @@ def main():
 
 @app.route('/show_data')
 def show_data():
-    config = configparser.ConfigParser()
-    config.read(r"D:\code\corona_cases\connection.ini")
-    sql = dict(config.items('SQL'))
-    cursor = sql_queries.create_conn(sql)
-    cursor.execute('select * from corona.. daily_updates')
-    fetch_data = cursor.fetchall()
-    cursor.close()
-    return render_template('show_data.html', data=fetch_data)
+    sql = data_master.data_config('sql')
+    if sql_queries.check_conn(sql) == 'success':
+        cursor = sql_queries.create_conn(sql)
+        cursor.execute('select * from corona.. daily_updates')
+        fetch_data = cursor.fetchall()
+        cursor.close()
+        return render_template('show_data.html', data=fetch_data)
+    else:
+        return 'failed. Please verify log for more info'
 
 
 if __name__ == '__main__':
