@@ -1,9 +1,8 @@
 import request_api
 import data_master
 import sql_queries
-from flask import render_template
+from flask import render_template, Flask, request, redirect, url_for
 import logging
-from flask import Flask
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(message)s', filename='process.log')
 app = Flask(__name__)
 
@@ -32,19 +31,30 @@ def main():
         return 'failed. Please verify log for more info'
 
 
-@app.route('/show_data')
-def show_data():
+@app.route('/runSQL', methods=["POST", "GET"])
+def runsql():
+    if request.method == 'POST':
+        query = request.form["nm"]
+        return redirect(url_for('show_result', qry=query))
+    else:
+        return render_template('run_sql.html')
+
+
+@app.route('/show_result/<qry>')
+def show_result(qry):
+    query = qry
+    print(query)
     sql = data_master.data_config('sql')
     if sql_queries.check_conn(sql) == 'success':
         cursor = sql_queries.create_conn(sql)
-        cursor.execute('select * from corona.. daily_updates')
+        cursor.execute(query)
+        headers = [i[0] for i in cursor.description]
         fetch_data = cursor.fetchall()
         cursor.close()
-        return render_template('show_data.html', data=fetch_data)
+        return render_template('show_result.html', head=headers, data=fetch_data)
     else:
         return 'failed. Please verify log for more info'
 
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8000)
-    show_data()
