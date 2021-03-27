@@ -42,18 +42,23 @@ def runsql():
 
 @app.route('/show_result/<qry>')
 def show_result(qry):
-    query = qry
-    print(query)
-    sql = data_master.data_config('sql')
-    if sql_queries.check_conn(sql) == 'success':
-        cursor = sql_queries.create_conn(sql)
-        cursor.execute(query)
-        headers = [i[0] for i in cursor.description]
-        fetch_data = cursor.fetchall()
-        cursor.close()
-        return render_template('show_result.html', head=headers, data=fetch_data)
+    query_input = qry.split()
+    query_not_allowed = ['delete', 'update', 'insert', 'alter', 'drop', 'truncate', 'create']
+    if data_master.query_check(query_input, query_not_allowed) is not True:
+        sql = data_master.data_config('sql')
+        if sql_queries.check_conn(sql) == 'success':
+            cursor = sql_queries.create_conn(sql)
+            cursor.execute(qry)
+            headers = [i[0] for i in cursor.description]
+            fetch_data = cursor.fetchall()
+            cursor.close()
+            return render_template('show_result.html', head=headers, data=fetch_data)
+        else:
+            return 'failed. Please verify log for more info'
+
     else:
-        return 'failed. Please verify log for more info'
+        logging.error('query other than select statement are performed')
+        return 'Query can be performed only with SELECT keyword'
 
 
 if __name__ == '__main__':

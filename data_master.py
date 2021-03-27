@@ -31,3 +31,8 @@ def data_config(section):
     else:
         logging.error('invalid input')
     return result
+
+
+def query_check(qry_input, not_allowed):
+    qry_chk = any(item in qry_input for item in not_allowed)
+    return qry_chk
