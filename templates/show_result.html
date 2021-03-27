@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<style>
+ td {
+        width: 150px;
+        text-align: center;
+        border: 1px solid black;
+        padding: 5px;
+     }
+ tr:nth-child(even) {
+  background-color: #eee;}
+ tr:nth-child(odd) {
+ background-color: #fff;
+ }
+ th {
+  background-color: black;
+  color: white;
+</style>
+<table>
+  <thead>
+    <tr style="font-family:courier;">
+        {% for row in head %}
+        <th>{{row}}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+     {% for row in data %}
+            <tr>
+                {% for cell in row %}
+                <td> {{cell}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
