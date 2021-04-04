@@ -17,7 +17,6 @@ def main():
     data = request.get_json()
     user_name = data.get('u_name', '')
     password = data.get('pwd', '')
-    access_type = data.get('a_type','')
     if request_api.check_valid(url) is True:
         logging.info('API sent valid response, proceeding to verify SQL connection')
         if sql_queries.check_conn(sql_string) is True:
@@ -30,17 +29,17 @@ def main():
                     return sql_queries.table_import(sql_string, daily_updates)
                 else:
                     logging.info(f"Data already present for date '{data_master.date_compare(corona)}'")
-                return error_handler.error_code('I-10','Data already imported')
-            elif sql_queries.authentication(sql_string, user_name, password, access_type) == 'user':
-                return error_handler.error_code('I-20','Only admin can import data')
+                return error_handler.error_code('I-10', 'Data already imported')
+            elif sql_queries.authentication(sql_string, user_name, password) == 'user':
+                return error_handler.error_code('I-20', 'Only admin can import data')
             else:
-                return error_handler.error_code('E-20','Invalid credentials or user not available')
+                return error_handler.error_code('E-20', 'Invalid credentials or user not available')
         else:
             logging.error('SQL failed to connect. Unable to proceed further')
-            return error_handler.error_code('E-10','SQL related problem occurred. Unable to process request')
+            return error_handler.error_code('E-10', 'SQL related problem occurred. Unable to process request')
     else:
         logging.error('API response failed. Unable to proceed further')
-        return error_handler.error_code('E-0','failed to Fetch API response')
+        return error_handler.error_code('E-0', 'failed to Fetch API response')
 
 
 @app.route('/runSQL', methods=["GET"])
@@ -48,8 +47,8 @@ def sql():
     sql_string = data_master.data_config('sql')
     data = request.get_json()
     query = data.get('qry', '')
-    user_name= data.get('u_name', '')
-    password= data.get('pwd', '')
+    user_name = data.get('u_name', '')
+    password = data.get('pwd', '')
     if sql_queries.check_conn(sql_string) is True:
         if sql_queries.authentication(sql_string, user_name, password) == 'admin':
             query_input = query.split()
@@ -63,21 +62,22 @@ def sql():
                 json_data = []
                 for result in fetch_data:
                     json_data.append(dict(zip(headers, result)))
-                final1 = json.dumps(json_data, ensure_ascii=False, default=myconverter, indent=4)
+                final1 = json.dumps(json_data, ensure_ascii=False, default=my_converter, indent=4)
                 return final1.encode('UTF-8')
             else:
-                return error_handler.error_code('I-0','Query statement not allowed')
+                return error_handler.error_code('I-0', 'Query statement not allowed')
         else:
-            return error_handler.error_code('E-20','Invalid credentials or user not available')
+            return error_handler.error_code('E-20', 'Invalid credentials or user not available')
     else:
-        return error_handler.error_code('E-10','SQL related problem occurred. Unable to process request')
+        return error_handler.error_code('E-10', 'SQL related problem occurred. Unable to process request')
 
 
-def myconverter(o):
+def my_converter(o):
     if isinstance(o, datetime.date):
         return o.__str__()
-    elif isinstance(o,bytes):
-        return o.__str__().replace("b'","").replace("'","").replace("\\","")
+    elif isinstance(o, bytes):
+        return o.__str__().replace("b'", "").replace("'", "").replace("\\", "")
+
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8000)
