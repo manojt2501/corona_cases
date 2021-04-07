@@ -43,7 +43,6 @@ def table_import(sql, data):
               "(country_name, country_code, new_cases, total_cases, new_deaths, " \
               "total_deaths, new_recovered, total_recovered, date) VALUES (%s);" \
               % (enc.decode())
-        # print(sql)
         cursor.execute(sql)
         cursor.commit()
     cursor.close()
@@ -67,7 +66,6 @@ def authentication(sql, u_name, pwd):
     date_last = str(data).replace("('", "").replace("', )", "")
     if data:
         if date_last == 'A':
-            print('admin')
             return 'admin'
         else:
             return 'user'

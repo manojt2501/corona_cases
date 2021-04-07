@@ -39,5 +39,4 @@ def data_config(section):
 # function to check if any input given matches with not_allowed list
 def query_check(qry_input, not_allowed):
     qry_chk = any(item in qry_input for item in not_allowed)
-    print(qry_chk)
     return qry_chk
