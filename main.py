@@ -31,7 +31,7 @@ def main():
         password = data.get('pwd', '')
         if request_api.check_valid(url) is True:
             logging.info('API sent valid response, proceeding to verify SQL connection')
-            if sql_queries.check_conn(sql_string) is True:
+            if sql_queries.create_conn(sql_string) is not False:
                 logging.info('SQL connection established, proceeding with data comparison')
                 corona = request_api.get_content(url)
                 if sql_queries.authentication(sql_string, user_name, password) == 'admin':
@@ -66,7 +66,7 @@ def sql():
         query = data.get('qry', '')
         user_name = data.get('u_name', '')
         password = data.get('pwd', '')
-        if sql_queries.check_conn(sql_string) is True:
+        if sql_queries.create_conn(sql_string) is not False:
             if sql_queries.authentication(sql_string, user_name, password) == 'admin':
                 query_input = query.split()
                 query_not_allowed = ['delete', 'update', 'insert', 'alter', 'drop', 'truncate', 'create']

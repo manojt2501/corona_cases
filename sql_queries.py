@@ -4,32 +4,19 @@ import error_handler
 
 
 # check SQL connectivity
-def check_conn(sql):
+def create_conn(sql):
     logging.info('Initiating connection with SQL')
     try:
         conn = pyodbc.connect(
             'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE='
             + sql['database'] + ';UID=' +
             sql['username'] + ';PWD=' + sql['password'], timeout=1)
+        cursor = conn.cursor()
+        return cursor
     except pyodbc.Error as er:
-        conn = 0
         sql_error = er.args[1]
         logging.error(sql_error)
-    if conn:
-        logging.info('connection created successfully')
-        return True
-    else:
-        logging.error('Unable to create connection with SQL. please check above exception')
         return False
-
-
-# create SQL connection
-def create_conn(sql):
-    conn = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + sql['server'] + ';DATABASE=' + sql['database'] + ';UID=' +
-        sql['username'] + ';PWD=' + sql['password'], timeout=1)
-    cursor = conn.cursor()
-    return cursor
 
 
 # to import daily data from API to table
