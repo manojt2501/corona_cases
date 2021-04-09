@@ -29,11 +29,11 @@ def main():
         RequestValidate().load(data)
         user_name = data.get('u_name', '')
         password = data.get('pwd', '')
-        if request_api.check_valid(url) is True:
+        corona = request_api.get_content(url)
+        if corona is not False:
             logging.info('API sent valid response, proceeding to verify SQL connection')
             if sql_queries.create_conn(sql_string) is not False:
                 logging.info('SQL connection established, proceeding with data comparison')
-                corona = request_api.get_content(url)
                 if sql_queries.authentication(sql_string, user_name, password) == 'admin':
                     if data_master.date_compare(corona) != sql_queries.last_update_comp(sql_string):
                         logging.info('data comparison completed, proceeding to import data')
