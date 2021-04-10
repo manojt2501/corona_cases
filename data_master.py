@@ -23,17 +23,13 @@ def date_compare(res_data):
 # function to get values from ini file
 def data_config(section):
     config = configparser.ConfigParser()
-    config.read(r"D:\code\corona_cases\connection.ini")
-    sql_string = dict(config.items('SQL'))
-    url = dict(config.items('API'))
-    result = 0
-    if section == 'sql':
-        result = sql_string
-    elif section == 'url':
-        result = url
+    section_allowed = ['SQL_local', 'API', 'SQL_AWS']
+    if query_check(section, section_allowed) is True:
+        config.read(r"D:\code\corona_cases\connection.ini")
+        result = dict(config.items(section))
+        return result
     else:
-        logging.error('invalid input')
-    return result
+        return False
 
 
 # function to check if any input given matches with not_allowed list

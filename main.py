@@ -22,7 +22,7 @@ class ChildClass(RequestValidate):
 
 @app.route('/data_import', methods=["POST"])
 def main():
-    url = data_master.data_config('url')
+    url = data_master.data_config('API')
     data = request.get_json()
     try:
         RequestValidate().load(data)
@@ -31,9 +31,9 @@ def main():
         conn_type = data.get('conn_type', '')
         sql_string = 0
         if conn_type == 'local':
-            sql_string = data_master.data_config('sql')
+            sql_string = data_master.data_config('SQL_local')
         elif conn_type == 'AWS':
-            sql_string = data_master.data_config('sql_aws')
+            sql_string = data_master.data_config('SQL_AWS')
         corona = request_api.get_content(url)
         if corona is not False:
             logging.info('API sent valid response, proceeding to verify SQL connection')
@@ -73,9 +73,9 @@ def sql():
         conn_type = data.get('conn_type', '')
         sql_string = 0
         if conn_type == 'local':
-            sql_string = data_master.data_config('sql')
+            sql_string = data_master.data_config('SQL_local')
         elif conn_type == 'AWS':
-            sql_string = data_master.data_config('sql_aws')
+            sql_string = data_master.data_config('SQL_AWS')
         if sql_queries.create_conn(sql_string) is not False:
             if sql_queries.authentication(sql_string, user_name, password) == 'admin':
                 query_input = query.split()
@@ -115,4 +115,4 @@ def error_code(code, message):
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8000)
+    app.run(host='localhost', port=8000, debug=False)

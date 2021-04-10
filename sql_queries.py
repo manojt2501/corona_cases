@@ -21,11 +21,10 @@ def create_conn(sql):
     elif sql['conn_type'] == 'AWS':
         try:
             conn = pymysql.connect(host=sql['server'], database=sql['database'], user=sql['username'],
-                                   password=sql['password'], port=3306)
-            print(conn)
+                                   password=sql['password'], port=3306, connect_timeout=1, autocommit=True)
             cursor = conn.cursor()
             return cursor
-        except pyodbc.Error as er:
+        except pymysql.Error as er:
             sql_error = er.args[1]
             logging.error(sql_error)
             return False
@@ -39,12 +38,11 @@ def table_import(sql, data):
         for items in data:
             values = ', '.join("'" + str(x).replace("'", "''") + "'" for x in items.values())
             enc = values.encode("utf-8")
-            sql = "INSERT INTO corona..daily_updates " \
-                  "(country_name, country_code, new_cases, total_cases, new_deaths, " \
-                  "total_deaths, new_recovered, total_recovered, date) VALUES (%s);" \
-                  % (enc.decode())
-            cursor.execute(sql)
-            cursor.commit()
+            # sql = "INSERT INTO daily_updates " \
+            #       "(country_name, country_code, new_cases, total_cases, new_deaths, " \
+            #       "total_deaths, new_recovered, total_recovered, date) VALUES (%s);" \
+            #       % (enc.decode())
+            # cursor.execute(sql)
         cursor.close()
         return {'message': 'data imported successfully'}
     except ImportError as error:
@@ -54,18 +52,18 @@ def table_import(sql, data):
 # function to fetch latest updated date
 def last_update_comp(sql):
     cursor = create_conn(sql)
-    cursor.execute('select * from corona.. last_updated')
+    cursor.execute("select DATE_FORMAT(date,'%Y-%m-%d') as date from daily_updates order by 1 desc limit 1")
     last_update_temp = cursor.fetchone()
-    last_update = str(last_update_temp).replace("('", "").replace("', )", "")
+    last_update = last_update_temp[0]
     cursor.close()
     return last_update
 
 
 def authentication(sql, u_name, pwd):
     cursor = create_conn(sql)
-    cursor.execute(f"select access_type from corona.. logins where u_name='{u_name}' and pwd='{pwd}'")
+    cursor.execute(f"select access_type from corona. logins where u_name='{u_name}' and pwd='{pwd}'")
     data = cursor.fetchone()
-    date_last = str(data).replace("('", "").replace("', )", "")
+    date_last = data[0][0]
     if data:
         if date_last == 'A':
             return 'admin'
