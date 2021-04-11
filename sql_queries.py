@@ -38,11 +38,11 @@ def table_import(sql, data):
         for items in data:
             values = ', '.join("'" + str(x).replace("'", "''") + "'" for x in items.values())
             enc = values.encode("utf-8")
-            # sql = "INSERT INTO daily_updates " \
-            #       "(country_name, country_code, new_cases, total_cases, new_deaths, " \
-            #       "total_deaths, new_recovered, total_recovered, date) VALUES (%s);" \
-            #       % (enc.decode())
-            # cursor.execute(sql)
+            sql = "INSERT INTO daily_updates " \
+                  "(country_name, country_code, new_cases, total_cases, new_deaths, " \
+                  "total_deaths, new_recovered, total_recovered, date) VALUES (%s);" \
+                  % (enc.decode())
+            cursor.execute(sql)
         cursor.close()
         return {'message': 'data imported successfully'}
     except ImportError as error:
