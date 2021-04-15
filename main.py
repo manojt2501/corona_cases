@@ -1,6 +1,6 @@
 import request_api
 import data_master
-import sql_queries
+from sql_queries import DatabaseDriver
 from marshmallow import Schema, fields, ValidationError
 from flask import Flask, request
 import logging
@@ -37,17 +37,23 @@ def main():
         corona = request_api.get_content(url)
         if corona is not False:
             logging.info('API sent valid response, proceeding to verify SQL connection')
-            if sql_queries.create_conn(sql_string) is not False:
+            db = DatabaseDriver(sql_string)
+            if db.create_conn() is not False:
                 logging.info('SQL connection established, proceeding with data comparison')
-                if sql_queries.authentication(sql_string, user_name, password) == 'admin':
-                    if data_master.date_compare(corona) != sql_queries.last_update_comp(sql_string):
+                if db.authentication(user_name, password) == 'admin':
+                    if data_master.date_compare(corona) != db.last_update_comp():
                         logging.info('data comparison completed, proceeding to import data')
                         daily_updates = data_master.daily_cases(corona)
-                        return sql_queries.table_import(sql_string, daily_updates)
+                        if db.table_import(daily_updates) is True:
+                            db.close_conn()
+                            return error_code('I-20', 'Data Imported successfully')
+                        else:
+                            db.close_conn()
+                            return error_code('E-20', 'Data Imported Failed')
                     else:
                         logging.info(f"Data already present for date '{data_master.date_compare(corona)}'")
                         return error_code('I-10', 'Data already imported')
-                elif sql_queries.authentication(sql_string, user_name, password) == 'user':
+                elif db.authentication(user_name, password) == 'user':
                     return error_code('I-20', 'Only admin can import data')
                 else:
                     return error_code('E-20', 'Invalid credentials or user not available')
@@ -76,18 +82,18 @@ def sql():
             sql_string = data_master.data_config('SQL_local')
         elif conn_type == 'AWS':
             sql_string = data_master.data_config('SQL_AWS')
-        if sql_queries.create_conn(sql_string) is not False:
-            if sql_queries.authentication(sql_string, user_name, password) == 'admin':
+        db = DatabaseDriver(sql_string)
+        if db.create_conn() is not False:
+            if db.authentication(user_name, password) == 'admin':
                 query_input = query.split()
                 query_not_allowed = ['delete', 'update', 'insert', 'alter', 'drop', 'truncate', 'create']
                 if data_master.query_check(query_input, query_not_allowed) is not True:
-                    cursor = sql_queries.create_conn(sql_string)
-                    cursor.execute(query)
-                    headers = [i[0] for i in cursor.description]
-                    fetch_data = cursor.fetchall()
-                    cursor.close()
+                    fetch_data = db.execute(query)
+                    result_data = fetch_data[1]
+                    headers = fetch_data[0]
+                    db.close_conn()
                     json_data = []
-                    for result in fetch_data:
+                    for result in result_data:
                         json_data.append(dict(zip(headers, result)))
                     final1 = json.dumps(json_data, ensure_ascii=False, default=my_converter, indent=4)
                     return final1.encode('UTF-8')
