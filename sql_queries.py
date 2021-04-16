@@ -45,14 +45,17 @@ class DatabaseDriver:
 
     def table_import(self, data):
         try:
+            text = ''
             for items in data:
-                values = ', '.join("'" + str(x).replace("'", "''") + "'" for x in items.values())
+                start = '('
+                values = start+', '.join("'" + str(x).replace("'", "''")+"'" for x in items.values())
                 enc = values.encode("utf-8")
-                sql = "INSERT INTO daily_updates " \
-                      "(country_name, country_code, new_cases, total_cases, new_deaths, " \
-                      "total_deaths, new_recovered, total_recovered, date) VALUES (%s);" \
-                      % (enc.decode())
-                self.cursor.execute(sql)
+                text = text + (enc.decode()) + '),'
+            sql_val = text.rstrip(text[-1])
+            sql_key = "INSERT INTO corona..daily_updates (country_name, country_code, new_cases, total_cases, " \
+                      "new_deaths, total_deaths, new_recovered, total_recovered, date) VALUES "
+            execute_sql = sql_key + sql_val
+            self.cursor.execute(execute_sql)
             return True
         except ImportError as error:
             logging.error(error)
