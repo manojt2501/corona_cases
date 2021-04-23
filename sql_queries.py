@@ -52,7 +52,7 @@ class DatabaseDriver:
                 enc = values.encode("utf-8")
                 text = text + (enc.decode()) + '),'
             sql_val = text.rstrip(text[-1])
-            sql_key = "INSERT INTO corona..daily_updates (country_name, country_code, new_cases, total_cases, " \
+            sql_key = "INSERT INTO corona. daily_updates (country_name, country_code, new_cases, total_cases, " \
                       "new_deaths, total_deaths, new_recovered, total_recovered, date) VALUES "
             execute_sql = sql_key + sql_val
             self.cursor.execute(execute_sql)
